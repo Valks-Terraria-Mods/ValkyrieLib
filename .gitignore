@@ -1,0 +1,12 @@
+# VSCode
+obj/
+bin/
+
+# Source
+Source/
+
+# Logs
+Logs.txt
+Diagnostics/**
+!Diagnostics/
+!Diagnostics/DiagnosticsConfig.cs

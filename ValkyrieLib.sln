@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ValkyrieLib", "ValkyrieLib.csproj", "{7DFD78A1-27E0-C3C8-8DB7-C4E60006E39A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7DFD78A1-27E0-C3C8-8DB7-C4E60006E39A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DFD78A1-27E0-C3C8-8DB7-C4E60006E39A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DFD78A1-27E0-C3C8-8DB7-C4E60006E39A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DFD78A1-27E0-C3C8-8DB7-C4E60006E39A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2FF40514-6635-4F94-8F96-2EECE68EF5ED}
+	EndGlobalSection
+EndGlobal

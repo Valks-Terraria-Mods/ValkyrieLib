@@ -1,0 +1,31 @@
+root = true
+
+[*.cs]
+# Member 'X' does not access instance data and can be marked as static
+#dotnet_diagnostic.CA1822.severity = warning
+
+# Remove braces
+dotnet_diagnostic.rcs1002.severity = warning
+
+# Remove unused usings
+dotnet_diagnostic.CS8019.severity = suggestion 
+
+# Remove blank lines
+dotnet_diagnostic.IDE2000.severity = suggestion
+dotnet_style_allow_multiple_blank_lines_experimental = false
+
+# ----------------------------------
+# ------ Suppressed analyzers ------
+# ----------------------------------
+
+# Remove unused usings (enabled as suggestion above in CS8019)
+dotnet_diagnostic.IDE0005.severity = none
+
+# Remove whitespace (this is handled by the formatter for us)
+dotnet_diagnostic.RCS1037.severity = silent
+
+# Terraria mods cannot have partial regex implementations (mod just crashes)
+dotnet_diagnostic.SYSLIB1045.severity = none
+
+# This analyzer is broken https://github.com/dotnet/format/issues/1623
+dotnet_diagnostic.IDE0130.severity = none

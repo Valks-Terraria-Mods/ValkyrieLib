@@ -1,0 +1,3 @@
+A library that contains some useful things that I will be using across all my mods.
+
+https://github.com/Valks-Terraria-Mods/ValkyrieLib

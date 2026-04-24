@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <!-- Import tModLoader mod properties -->
+    <Import Project="..\tModLoader.targets" />
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <BuildMod>false</BuildMod>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Roslynator.Analyzers" Version="4.15.0">
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
+    </ItemGroup>
+
+</Project>
