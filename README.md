@@ -5,7 +5,7 @@ public class YourMod : Mod
 {
     public override void Load()
     {
-        ModHandle modHandle = ValkyrieAPI.GetHandle(this);
+        var modHandle = ValkyrieAPI.GetHandle(this);
 
         modHandle.RegisterUI("My Panel", "H", () => new MyCustomPanel());
         modHandle.RegisterKeybind("Hello", "K", () => Main.NewText("Hello!"));
@@ -23,7 +23,7 @@ public class MyCustomPanel : UIState, IHasMainElement, IClosable
 
     public override void OnInitialize()
     {
-        UIPanel panel = new();
+        var panel = new UIPanel();
         panel.Width.Set(300, 0f);
         panel.Height.Set(150, 0f);
         panel.BackgroundColor = Main.OurFavoriteColor;
@@ -31,7 +31,13 @@ public class MyCustomPanel : UIState, IHasMainElement, IClosable
         panel.VAlign = 0.5f;
         Append(panel);
 
-        UIButton<string> closeButton = UiControlFactory.CloseBtn();
+        // VBoxContainer (and HBoxContainer) handle sizing for you automatically
+        var vbox = new VBoxContainer();
+        vbox.Append(element1);
+        vbox.Append(element2);
+        panel.Append(vbox);
+
+        var closeButton = UiControlFactory.CloseBtn();
         closeButton.OnLeftClick += (_, _) => CloseRequested?.Invoke();
         panel.Append(closeButton);
 
