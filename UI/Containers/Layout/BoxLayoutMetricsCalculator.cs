@@ -49,22 +49,7 @@ internal static class BoxLayoutMetricsCalculator
         return ResolveActualSize(0f, measured, styleSize);
     }
 
-    private static bool ShouldPreMeasureChildOnAxis(StyleDimension size, 
-        StyleDimension minSize, 
-        float autoEpsilon)
-    {
-        if (HasStyleOverride(size, autoEpsilon))
-            return false;
-
-        return !HasStyleOverride(minSize, autoEpsilon);
-    }
-
-    private static bool HasStyleOverride(StyleDimension dimension, float autoEpsilon)
-    {
-        return dimension.Percent > autoEpsilon || dimension.Pixels > autoEpsilon;
-    }
-
-    public static float GetChildMinSize(UIElement child, 
+    internal static float GetChildMinSize(UIElement child, 
         float parentSize, 
         bool isExpandable, 
         bool includeMeasuredSize, 
@@ -79,6 +64,21 @@ internal static class BoxLayoutMetricsCalculator
         }
 
         return MathF.Max(0f, min);
+    }
+
+    private static bool ShouldPreMeasureChildOnAxis(StyleDimension size, 
+        StyleDimension minSize, 
+        float autoEpsilon)
+    {
+        if (HasStyleOverride(size, autoEpsilon))
+            return false;
+
+        return !HasStyleOverride(minSize, autoEpsilon);
+    }
+
+    private static bool HasStyleOverride(StyleDimension dimension, float autoEpsilon)
+    {
+        return dimension.Percent > autoEpsilon || dimension.Pixels > autoEpsilon;
     }
 
     private static float GetMinConstraintSize(UIElement child, 

@@ -16,6 +16,18 @@ internal static class BoxLayoutPlacementApplier
         return ApplyHorizontalPlacement(child, primaryOffset, epsilon);
     }
 
+    internal static bool ApplyPrimarySize(UIElement child, 
+        float size, 
+        float parentSize, 
+        bool isVertical, 
+        float epsilon)
+    {
+        if (isVertical)
+            return ApplyVerticalPrimarySize(child, size, parentSize, epsilon);
+
+        return ApplyHorizontalPrimarySize(child, size, parentSize, epsilon);
+    }
+
     private static bool ApplyVerticalPlacement(UIElement child, 
         float primaryOffset, 
         float epsilon)
@@ -61,18 +73,6 @@ internal static class BoxLayoutPlacementApplier
 
         applyPosition(targetPixels, 0f);
         return true;
-    }
-
-    public static bool ApplyPrimarySize(UIElement child, 
-        float size, 
-        float parentSize, 
-        bool isVertical, 
-        float epsilon)
-    {
-        if (isVertical)
-            return ApplyVerticalPrimarySize(child, size, parentSize, epsilon);
-
-        return ApplyHorizontalPrimarySize(child, size, parentSize, epsilon);
     }
 
     private static bool ApplyVerticalPrimarySize(UIElement child, 
