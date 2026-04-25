@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        "**/*.sln": true,
+        "icon_small.png": true,
+        "icon.png": true
+    }
+}
