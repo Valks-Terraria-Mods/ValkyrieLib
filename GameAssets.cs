@@ -5,12 +5,12 @@ using Terraria;
 
 namespace ValkyrieLib;
 
-public static class GameAssets
+internal static class GameAssets
 {
+    internal static Asset<Texture2D> CategoryPanel => GetTexture(GameTexture.CategoryPanel);
+    internal static Asset<Texture2D> CategoryPanelBorder => GetTexture(GameTexture.CategoryPanelBorder);
+    
     private static readonly Dictionary<GameTexture, Asset<Texture2D>> _textureCache = [];
-
-    public static Asset<Texture2D> CategoryPanel => GetTexture(GameTexture.CategoryPanel);
-    public static Asset<Texture2D> CategoryPanelBorder => GetTexture(GameTexture.CategoryPanelBorder);
 
     private static Asset<Texture2D> GetTexture(GameTexture texture)
     {
