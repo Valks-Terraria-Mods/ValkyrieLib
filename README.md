@@ -1,5 +1,21 @@
 # ValkyrieLib
 
+## API
+### Classes
+`HBoxContainer` - Horizontally auto sizes elements for you.  
+`VBoxContainer` - Vertically auto sizes elements for you.  
+`InputField` - An input field ui component.  
+
+### Interfaces
+`IClosable` - This element is closable.  
+`IInputConsumer` - This element consumes mouse / keyboard inputs.  
+
+### Methods
+`ValkyrieAPI.GetHandle(Mod)` - Exposes mod related API through `ModHandle`.  
+`modHandle.RegisterUI(string, string, Func<UIState>)` - Register a new ui element.  
+`modHandle.RegisterKeybind(string, string, Action)` - Register a new keybind tied to an action.  
+
+## Example Usage
 ```cs
 public class YourMod : Mod
 {
@@ -14,9 +30,8 @@ public class YourMod : Mod
 ```
 
 ```cs
-public class MyCustomPanel : UIState, IHasMainElement, IClosable
+public class MyCustomPanel : UIState, IInputConsumer, IClosable
 {
-    // Implement IHasMainElement to consume input when the mouse hovers over this element
     public UIElement MainElement { get; private set; }
 
     public event Action CloseRequested;
@@ -31,13 +46,12 @@ public class MyCustomPanel : UIState, IHasMainElement, IClosable
         panel.VAlign = 0.5f;
         Append(panel);
 
-        // VBoxContainer (and HBoxContainer) handle sizing for you automatically
         var vbox = new VBoxContainer();
-        vbox.Append(element1);
-        vbox.Append(element2);
+        vbox.Append(/*define element1 here*/);
+        vbox.Append(/*define element2 here*/);
         panel.Append(vbox);
-
-        var closeButton = UiControlFactory.CloseBtn();
+        
+        var closeButton = /*define close btn here*/;
         closeButton.OnLeftClick += (_, _) => CloseRequested?.Invoke();
         panel.Append(closeButton);
 
