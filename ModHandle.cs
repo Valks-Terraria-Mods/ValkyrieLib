@@ -27,7 +27,7 @@ public class ModHandle
     /// <param name="keybind">The default key binding (e.g. <c>"H"</c>) that toggles the panel.</param>
     /// <param name="factory">A factory that creates the <see cref="UIState"/> to display when the panel is shown.</param>
     public void RegisterUI(string name, string keybind, Func<UIState> factory) => _uiService.Insert(_mod, name, keybind, factory);
-    
+
     /// <summary>
     /// Registers a new keybind that invokes an action.
     /// </summary>

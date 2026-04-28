@@ -72,18 +72,18 @@ internal class ToggleableUi(string id, Func<UIState> stateFactory)
     private bool Draw()
     {
         _userInterface.Draw(Main.spriteBatch, _lastUpdateGameTime);
-        
+
         if (_state is IInputConsumer withElement && withElement.MainElement.ContainsPoint(Main.MouseScreen))
         {
             // Consume mouse input if mouse is in the ui element (seems to only block sword swinging but not hovering over the hotbar)
             // https://github.com/tModLoader/tModLoader/wiki/Advanced-guide-to-custom-UI#preventing-mouse-clicks-from-using-selected-item
             Main.LocalPlayer.mouseInterface = true;
-            
+
             // Prevent scroll changing hotbar (the passed in string can be anything)
             // https://github.com/tModLoader/tModLoader/wiki/Advanced-guide-to-custom-UI#preventing-scroll-wheel-from-shifting-selected-hotbar-item
             PlayerInput.LockVanillaMouseScroll($"{nameof(ValkyrieLib)}/ScrollList");
         }
-        
+
         return true;
     }
 

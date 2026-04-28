@@ -42,8 +42,8 @@ internal static class BoxContainerLayoutBuilder
         return layouts;
     }
 
-    internal static float GetTargetPrimarySize(BoxChildLayout layout, 
-        float totalExpandWeight, 
+    internal static float GetTargetPrimarySize(BoxChildLayout layout,
+        float totalExpandWeight,
         float remaining)
     {
         float targetPrimarySize = layout.MinSize;

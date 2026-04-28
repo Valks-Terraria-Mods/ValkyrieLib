@@ -206,7 +206,7 @@ public abstract class BoxContainer : UIElement
         float availablePrimary)
     {
         bool placementChanged = BoxLayoutPlacementApplier.ApplyPrimaryPlacement(child, cursor, IsVertical, AutoEpsilon);
-        
+
         bool primarySizeChanged = layout.ExpandWeight > 0f
             && BoxLayoutPlacementApplier.ApplyPrimarySize(child, targetPrimarySize, availablePrimary, IsVertical, AutoEpsilon);
 

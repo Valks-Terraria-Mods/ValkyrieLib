@@ -11,9 +11,9 @@ internal static class BoxLayoutMetricsCalculator
         return percent > 0f ? percent : 0f;
     }
 
-    internal static bool ShouldPreMeasureChild(UIElement child, 
-        float expandWeight, 
-        bool isVertical, 
+    internal static bool ShouldPreMeasureChild(UIElement child,
+        float expandWeight,
+        bool isVertical,
         float autoEpsilon)
     {
         if (expandWeight > 0f)
@@ -25,9 +25,9 @@ internal static class BoxLayoutMetricsCalculator
         return ShouldPreMeasureChildOnAxis(child.Width, child.MinWidth, autoEpsilon);
     }
 
-    internal static float GetActualPrimarySize(UIElement child, 
-        float fallback, 
-        float parentPrimary, 
+    internal static float GetActualPrimarySize(UIElement child,
+        float fallback,
+        float parentPrimary,
         bool isVertical)
     {
         float measured = GetMeasuredSize(child, useHeight: isVertical);
@@ -37,8 +37,8 @@ internal static class BoxLayoutMetricsCalculator
         return ResolveActualSize(fallback, measured, styleSize);
     }
 
-    internal static float GetActualCrossSize(UIElement child, 
-        CalculatedStyle innerDimensions, 
+    internal static float GetActualCrossSize(UIElement child,
+        CalculatedStyle innerDimensions,
         bool isVertical)
     {
         float measured = GetMeasuredSize(child, useHeight: !isVertical);
@@ -49,10 +49,10 @@ internal static class BoxLayoutMetricsCalculator
         return ResolveActualSize(0f, measured, styleSize);
     }
 
-    internal static float GetChildMinSize(UIElement child, 
-        float parentSize, 
-        bool isExpandable, 
-        bool includeMeasuredSize, 
+    internal static float GetChildMinSize(UIElement child,
+        float parentSize,
+        bool isExpandable,
+        bool includeMeasuredSize,
         bool isVertical)
     {
         float min = GetMinConstraintSize(child, parentSize, isVertical);
@@ -66,8 +66,8 @@ internal static class BoxLayoutMetricsCalculator
         return MathF.Max(0f, min);
     }
 
-    private static bool ShouldPreMeasureChildOnAxis(StyleDimension size, 
-        StyleDimension minSize, 
+    private static bool ShouldPreMeasureChildOnAxis(StyleDimension size,
+        StyleDimension minSize,
         float autoEpsilon)
     {
         if (HasStyleOverride(size, autoEpsilon))
@@ -81,8 +81,8 @@ internal static class BoxLayoutMetricsCalculator
         return dimension.Percent > autoEpsilon || dimension.Pixels > autoEpsilon;
     }
 
-    private static float GetMinConstraintSize(UIElement child, 
-        float parentSize, 
+    private static float GetMinConstraintSize(UIElement child,
+        float parentSize,
         bool isVertical)
     {
         return isVertical
@@ -90,9 +90,9 @@ internal static class BoxLayoutMetricsCalculator
             : MathF.Max(0f, child.MinWidth.Pixels + (child.MinWidth.Percent * parentSize));
     }
 
-    private static float IncludeMeasuredSize(float min, 
-        UIElement child, 
-        bool includeMeasuredSize, 
+    private static float IncludeMeasuredSize(float min,
+        UIElement child,
+        bool includeMeasuredSize,
         bool isVertical)
     {
         if (!includeMeasuredSize)
@@ -106,9 +106,9 @@ internal static class BoxLayoutMetricsCalculator
         return MathF.Max(min, measured);
     }
 
-    private static float IncludeStyleSize(float min, 
-        UIElement child, 
-        float parentSize, 
+    private static float IncludeStyleSize(float min,
+        UIElement child,
+        float parentSize,
         bool isVertical)
     {
         StyleDimension size = isVertical ? child.Height : child.Width;

@@ -5,9 +5,9 @@ namespace ValkyrieLib;
 
 internal static class BoxLayoutPlacementApplier
 {
-    internal static bool ApplyPrimaryPlacement(UIElement child, 
-        float primaryOffset, 
-        bool isVertical, 
+    internal static bool ApplyPrimaryPlacement(UIElement child,
+        float primaryOffset,
+        bool isVertical,
         float epsilon)
     {
         if (isVertical)
@@ -16,10 +16,10 @@ internal static class BoxLayoutPlacementApplier
         return ApplyHorizontalPlacement(child, primaryOffset, epsilon);
     }
 
-    internal static bool ApplyPrimarySize(UIElement child, 
-        float size, 
-        float parentSize, 
-        bool isVertical, 
+    internal static bool ApplyPrimarySize(UIElement child,
+        float size,
+        float parentSize,
+        bool isVertical,
         float epsilon)
     {
         if (isVertical)
@@ -28,8 +28,8 @@ internal static class BoxLayoutPlacementApplier
         return ApplyHorizontalPrimarySize(child, size, parentSize, epsilon);
     }
 
-    private static bool ApplyVerticalPlacement(UIElement child, 
-        float primaryOffset, 
+    private static bool ApplyVerticalPlacement(UIElement child,
+        float primaryOffset,
         float epsilon)
     {
         bool changed = false;
@@ -39,8 +39,8 @@ internal static class BoxLayoutPlacementApplier
         return changed;
     }
 
-    private static bool ApplyHorizontalPlacement(UIElement child, 
-        float primaryOffset, 
+    private static bool ApplyHorizontalPlacement(UIElement child,
+        float primaryOffset,
         float epsilon)
     {
         bool changed = false;
@@ -50,8 +50,8 @@ internal static class BoxLayoutPlacementApplier
         return changed;
     }
 
-    private static bool TrySetAlignment(float currentValue, 
-        float epsilon, 
+    private static bool TrySetAlignment(float currentValue,
+        float epsilon,
         Action<float> applyAlignment)
     {
         if (MathF.Abs(currentValue) <= epsilon)
@@ -75,9 +75,9 @@ internal static class BoxLayoutPlacementApplier
         return true;
     }
 
-    private static bool ApplyVerticalPrimarySize(UIElement child, 
-        float size, 
-        float parentSize, 
+    private static bool ApplyVerticalPrimarySize(UIElement child,
+        float size,
+        float parentSize,
         float epsilon)
     {
         return ApplyPrimarySizeForDimension(
@@ -88,9 +88,9 @@ internal static class BoxLayoutPlacementApplier
             (targetPixels, targetPercent) => child.Height.Set(targetPixels, targetPercent));
     }
 
-    private static bool ApplyHorizontalPrimarySize(UIElement child, 
-        float size, 
-        float parentSize, 
+    private static bool ApplyHorizontalPrimarySize(UIElement child,
+        float size,
+        float parentSize,
         float epsilon)
     {
         return ApplyPrimarySizeForDimension(

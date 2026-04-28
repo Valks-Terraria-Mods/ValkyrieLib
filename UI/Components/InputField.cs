@@ -114,7 +114,7 @@ public class InputField : UIElement
 
         if (!CaretCanBlink(_focused))
             return;
-        
+
         DrawCaret(spriteBatch, valuePos, _value);
     }
 
@@ -130,11 +130,11 @@ public class InputField : UIElement
             return;
 
         // Prevent the player moving around when typing
-        PlayerInput.WritingText = true; 
+        PlayerInput.WritingText = true;
 
         // Handles special multilanguage characters
-        Main.instance.HandleIME(); 
-        
+        Main.instance.HandleIME();
+
         SetValue(Main.GetInputText(_value));
 
         KeyboardState keys = Main.keyState;
