@@ -4,7 +4,12 @@
 ### Classes
 `HBoxContainer` - Horizontally auto sizes elements for you.  
 `VBoxContainer` - Vertically auto sizes elements for you.  
-`InputField` - An input field ui component.  
+
+### Components
+`InputField`  
+`Slider`  
+`RgbSlider`  
+`HsvSlider`  
 
 ### Interfaces
 `IClosable` - This element is closable.  
