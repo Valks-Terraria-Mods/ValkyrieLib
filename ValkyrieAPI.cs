@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI;
@@ -45,6 +46,13 @@ public static class ValkyrieAPI
             searchCancelBtn.Top = StyleDimension.FromPixels(-Inset);
 
             return searchCancelBtn;
+        }
+
+        public static class Colors
+        {
+            public static Color LightBackground { get; } = new(29, 37, 69, 224);
+            public static Color DarkBackground { get; } = new(21, 30, 59, 230);
+            public static Color Border { get; } = new(77, 96, 151);
         }
     }
 }
