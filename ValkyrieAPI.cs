@@ -37,7 +37,7 @@ public static class ValkyrieAPI
         public static UIImageButton CreateCloseButton()
         {
             // Push the button slightly further to the top right corner
-            const int Inset = 5;
+            const float Inset = 6.5f;
 
             var searchCancelBtn = GameAssets.SearchCancelButton;
 
