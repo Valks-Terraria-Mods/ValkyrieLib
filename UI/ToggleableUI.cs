@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Terraria;
+using Terraria.GameContent.UI.Elements;
 using Terraria.GameInput;
 using Terraria.UI;
 
 namespace ValkyrieLib;
 
-internal class ToggleableUi(string id, Func<UIState> stateFactory)
+internal class ToggleableUI(string id, Func<UIState> stateFactory)
 {
     /// <summary>
     /// Returns true if this ui is visible in-game.
@@ -18,6 +19,7 @@ internal class ToggleableUi(string id, Func<UIState> stateFactory)
     private readonly UserInterface _userInterface = new();
     private readonly string _name = $"{nameof(ValkyrieLib)}: {id}";
     private UIState _state;
+    private UIImageButton _closeBtn;
 
     /// <summary>
     /// Toggles the visibility of this ui.
@@ -39,10 +41,15 @@ internal class ToggleableUi(string id, Func<UIState> stateFactory)
 
         _state = stateFactory();
 
-        if (_state is IClosable closable)
-            closable.CloseRequested += OnCloseRequested;
-
         _userInterface.SetState(_state);
+        
+        if (_state is IHasCloseButton @interface)
+        {
+            _closeBtn = CreateCloseButton();
+            _closeBtn.OnLeftClick += OnClickCloseBtn;
+
+            @interface.MainElement.Append(_closeBtn);
+        }
     }
 
     /// <summary>
@@ -52,8 +59,8 @@ internal class ToggleableUi(string id, Func<UIState> stateFactory)
     {
         IsVisible = false;
 
-        if (_state is IClosable closable)
-            closable.CloseRequested -= OnCloseRequested;
+        if (_state is IHasCloseButton)
+            _closeBtn.OnLeftClick -= OnClickCloseBtn;
 
         _userInterface.SetState(null);
     }
@@ -73,7 +80,7 @@ internal class ToggleableUi(string id, Func<UIState> stateFactory)
     {
         _userInterface.Draw(Main.spriteBatch, _lastUpdateGameTime);
 
-        if (_state is IInputConsumer withElement && withElement.MainElement.ContainsPoint(Main.MouseScreen))
+        if (_state is IBlocksInput @interface && @interface.MainElement.ContainsPoint(Main.MouseScreen))
         {
             // Consume mouse input if mouse is in the ui element (seems to only block sword swinging but not hovering over the hotbar)
             // https://github.com/tModLoader/tModLoader/wiki/Advanced-guide-to-custom-UI#preventing-mouse-clicks-from-using-selected-item
@@ -87,5 +94,22 @@ internal class ToggleableUi(string id, Func<UIState> stateFactory)
         return true;
     }
 
-    private void OnCloseRequested() => Hide();
+    private void OnClickCloseBtn(UIMouseEvent evt, UIElement listeningElement) => Hide();
+
+    /// <summary>
+    /// Creates a close button docked to the top right.
+    /// </summary>
+    private static UIImageButton CreateCloseButton()
+    {
+        // Push the button slightly further to the top right corner
+        const float Inset = 6.5f;
+
+        var searchCancelBtn = GameAssets.SearchCancelButton;
+
+        searchCancelBtn.HAlign = 1f;
+        searchCancelBtn.Left = StyleDimension.FromPixels(Inset);
+        searchCancelBtn.Top = StyleDimension.FromPixels(-Inset);
+
+        return searchCancelBtn;
+    }
 }

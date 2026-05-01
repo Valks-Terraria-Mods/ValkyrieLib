@@ -3,7 +3,6 @@
 ## API
 ### ValkyreAPI
 `ValkyrieAPI.GetHandle(Mod)` - Exposes mod related API through `ModHandle`.  
-`ValkyrieAPI.UI.CreateCloseButton()` - Creates a close button docked at the top right.  
 
 ### ModHandle
 `RegisterUI(string, string, Func<UIState>)` - Register a new ui element.  
@@ -21,8 +20,8 @@
 `HsvSlider`  
 
 ### Interfaces
-`IClosable` - This element is closable.  
-`IInputConsumer` - This element consumes mouse / keyboard inputs.  
+`IHasCloseButton`  
+`IBlocksInput`  
 
 ## Example Usage
 ```cs
@@ -39,7 +38,7 @@ public class YourMod : Mod
 ```
 
 ```cs
-public class MyCustomPanel : UIState, IInputConsumer, IClosable
+public class MyCustomPanel : UIState, IBlocksInput, IHasCloseButton
 {
     public UIElement MainElement { get; private set; }
 
@@ -59,10 +58,6 @@ public class MyCustomPanel : UIState, IInputConsumer, IClosable
         vbox.Append(/*define element1 here*/);
         vbox.Append(/*define element2 here*/);
         panel.Append(vbox);
-        
-        var closeButton = /*define close btn here*/;
-        closeButton.OnLeftClick += (_, _) => CloseRequested?.Invoke();
-        panel.Append(closeButton);
 
         MainElement = panel;
     }

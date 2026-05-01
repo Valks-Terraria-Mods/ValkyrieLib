@@ -31,23 +31,6 @@ public static class ValkyrieAPI
     /// </summary>
     public static class UI
     {
-        /// <summary>
-        /// Creates a close button docked to the top right.
-        /// </summary>
-        public static UIImageButton CreateCloseButton()
-        {
-            // Push the button slightly further to the top right corner
-            const float Inset = 6.5f;
-
-            var searchCancelBtn = GameAssets.SearchCancelButton;
-
-            searchCancelBtn.HAlign = 1f;
-            searchCancelBtn.Left = StyleDimension.FromPixels(Inset);
-            searchCancelBtn.Top = StyleDimension.FromPixels(-Inset);
-
-            return searchCancelBtn;
-        }
-
         public static class Colors
         {
             public static Color LightBackground { get; } = new(29, 37, 69, 224);
