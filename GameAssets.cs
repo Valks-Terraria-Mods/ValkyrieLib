@@ -8,14 +8,15 @@ namespace ValkyrieLib;
 
 internal static class GameAssets
 {
-    internal static Asset<Texture2D> CategoryPanel => GetTexture(GameTexture.CategoryPanel);
-    internal static Asset<Texture2D> CategoryPanelBorder => GetTexture(GameTexture.CategoryPanelBorder);
+    internal static Asset<Texture2D> CategoryPanel => GetTexture(GameTexture.CharCreation_CategoryPanel);
+    internal static Asset<Texture2D> CategoryPanelBorder => GetTexture(GameTexture.CharCreation_CategoryPanelBorder);
+    internal static UIImageButton SearchCancelButton => new(GetTexture(GameTexture.SearchCancel));
 
     internal static class ColorActions
     {
-        internal static UIColoredImageButton Copy => BuildSmallButton(GameTexture.Copy);
-        internal static UIColoredImageButton Paste => BuildSmallButton(GameTexture.Paste);
-        internal static UIColoredImageButton Randomize => BuildSmallButton(GameTexture.Randomize);
+        internal static UIColoredImageButton Copy => BuildSmallButton(GameTexture.CharCreation_Copy);
+        internal static UIColoredImageButton Paste => BuildSmallButton(GameTexture.CharCreation_Paste);
+        internal static UIColoredImageButton Randomize => BuildSmallButton(GameTexture.CharCreation_Randomize);
     }
 
     private static UIColoredImageButton BuildSmallButton(GameTexture texture)
@@ -27,11 +28,12 @@ internal static class GameAssets
 
     private static Asset<Texture2D> GetTexture(GameTexture texture)
     {
-        const string BasePath = "Images/UI/CharCreation/";
+        const string BasePath = "Images/UI/";
 
         if (!_textureCache.TryGetValue(texture, out var asset))
         {
-            asset = Main.Assets.Request<Texture2D>(BasePath + texture.ToString(), AssetRequestMode.ImmediateLoad);
+            var normalizedTexture = texture.ToString().Replace("_", "/");
+            asset = Main.Assets.Request<Texture2D>(BasePath + normalizedTexture, AssetRequestMode.ImmediateLoad);
             _textureCache[texture] = asset;
         }
 
@@ -40,10 +42,11 @@ internal static class GameAssets
 
     private enum GameTexture
     {
-        CategoryPanel,
-        CategoryPanelBorder,
-        Copy,
-        Paste,
-        Randomize
+        CharCreation_CategoryPanel,
+        CharCreation_CategoryPanelBorder,
+        CharCreation_Copy,
+        CharCreation_Paste,
+        CharCreation_Randomize,
+        SearchCancel
     }
 }

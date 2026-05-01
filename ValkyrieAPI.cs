@@ -1,3 +1,4 @@
+using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using Terraria.ModLoader.UI;
 using Terraria.UI;
@@ -32,16 +33,18 @@ public static class ValkyrieAPI
         /// <summary>
         /// Creates a close button docked to the top right.
         /// </summary>
-        public static UIButton<string> CreateCloseButton()
+        public static UIImageButton CreateCloseButton()
         {
-            const int Size = 32;
+            // Push the button slightly further to the top right corner
+            const int Inset = 5;
 
-            return new UIButton<string>("X")
-            {
-                Width = StyleDimension.FromPixels(Size),
-                Height = StyleDimension.FromPixels(Size),
-                HAlign = 1f,
-            };
+            var searchCancelBtn = GameAssets.SearchCancelButton;
+
+            searchCancelBtn.HAlign = 1f;
+            searchCancelBtn.Left = StyleDimension.FromPixels(Inset);
+            searchCancelBtn.Top = StyleDimension.FromPixels(-Inset);
+
+            return searchCancelBtn;
         }
     }
 }
