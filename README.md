@@ -17,6 +17,7 @@
 
 ### Methods
 `ValkyrieAPI.GetHandle(Mod)` - Exposes mod related API through `ModHandle`.  
+`ValkyrieAPI.UI.CreateCloseButton()` - Creates a close button docked at the top right.  
 `modHandle.RegisterUI(string, string, Func<UIState>)` - Register a new ui element.  
 `modHandle.RegisterKeybind(string, string, Action)` - Register a new keybind tied to an action.  
 

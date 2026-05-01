@@ -1,4 +1,6 @@
 using Terraria.ModLoader;
+using Terraria.ModLoader.UI;
+using Terraria.UI;
 
 namespace ValkyrieLib;
 
@@ -21,4 +23,25 @@ public static class ValkyrieAPI
     /// </summary>
     /// <param name="mod">The mod instance.</param>
     public static ModHandle GetHandle(Mod mod) => new(mod, KeybindService, UIService);
+
+    /// <summary>
+    /// Contains various UI related helpers.
+    /// </summary>
+    public static class UI
+    {
+        /// <summary>
+        /// Creates a close button docked to the top right.
+        /// </summary>
+        public static UIButton<string> CreateCloseButton()
+        {
+            const int Size = 32;
+
+            return new UIButton<string>("X")
+            {
+                Width = StyleDimension.FromPixels(Size),
+                Height = StyleDimension.FromPixels(Size),
+                HAlign = 1f,
+            };
+        }
+    }
 }
