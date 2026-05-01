@@ -1,6 +1,15 @@
 # ValkyrieLib
 
 ## API
+### ValkyreAPI
+`ValkyrieAPI.GetHandle(Mod)` - Exposes mod related API through `ModHandle`.  
+`ValkyrieAPI.UI.CreateCloseButton()` - Creates a close button docked at the top right.  
+
+### ModHandle
+`RegisterUI(string, string, Func<UIState>)` - Register a new ui element.  
+`RegisterKeybind(string, string, Action)` - Register a new keybind tied to an action.  
+`Log(object)` - Log something to `Logs.txt` in root.  
+
 ### Classes
 `HBoxContainer` - Horizontally auto sizes elements for you.  
 `VBoxContainer` - Vertically auto sizes elements for you.  
@@ -14,12 +23,6 @@
 ### Interfaces
 `IClosable` - This element is closable.  
 `IInputConsumer` - This element consumes mouse / keyboard inputs.  
-
-### Methods
-`ValkyrieAPI.GetHandle(Mod)` - Exposes mod related API through `ModHandle`.  
-`ValkyrieAPI.UI.CreateCloseButton()` - Creates a close button docked at the top right.  
-`modHandle.RegisterUI(string, string, Func<UIState>)` - Register a new ui element.  
-`modHandle.RegisterKeybind(string, string, Action)` - Register a new keybind tied to an action.  
 
 ## Example Usage
 ```cs

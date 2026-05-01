@@ -1,1 +1,15 @@
+Configs: {
+	ValkyreLibConfig: {
+		DisplayName: Valkyre Lib Config
 
+		ClearLogOnStartup: {
+			Label: Clear Log On Startup
+			Tooltip: ""
+		}
+
+		LogFile: {
+			Label: Log File
+			Tooltip: ""
+		}
+	}
+}
