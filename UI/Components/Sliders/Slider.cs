@@ -9,20 +9,6 @@ namespace ValkyrieLib;
 
 public class Slider : UIElement
 {
-    public Color TrackBorderColor { get; set; } = DefaultTrackBorderColor;
-
-    public Color TrackBackgroundColor { get; set; } = DefaultTrackBackgroundColor;
-
-    public Color FillColor { get; set; } = DefaultTrackFillColor;
-
-    public Color KnobFaceColor { get; set; } = DefaultKnobFaceColor;
-
-    public Color KnobBorderColor { get; set; } = DefaultKnobBorderColor;
-
-    public Color KnobGripColor { get; set; } = DefaultKnobGripColor;
-
-    public Func<float, Color> GradientColorAt { get; set; }
-
     /// <summary>
     /// Fired when the slider value changes due to user input.
     /// </summary>
@@ -33,15 +19,17 @@ public class Slider : UIElement
     /// </summary>
     public float Value { get; private set; }
 
+    public Func<float, Color> GradientColorAt { get; set; }
+
     private const float KnobWidthBase = 12f;
     private const float KnobHeightBase = 14f;
 
-    private static readonly Color DefaultTrackBorderColor = new(70, 86, 112);
-    private static readonly Color DefaultTrackBackgroundColor = new(18, 22, 30);
-    private static readonly Color DefaultTrackFillColor = new(255, 255, 255);
-    private static readonly Color DefaultKnobFaceColor = new(24, 32, 44);
-    private static readonly Color DefaultKnobBorderColor = new(146, 190, 255);
-    private static readonly Color DefaultKnobGripColor = new(186, 216, 255);
+    private Color _trackBackgroundColor = new(18, 22, 30);
+    private Color _trackBorderColor = ValkyrieAPI.UI.Colors.Border;
+    private Color _fillColor = new(255, 255, 255);
+    private Color _knobFaceColor = new(24, 32, 44);
+    private Color _knobBorderColor = new(146, 190, 255);
+    private Color _knobGripColor = new(186, 216, 255);
 
     private readonly UIElement _track;
     private readonly float _minValue;
@@ -167,12 +155,12 @@ public class Slider : UIElement
             return;
 
         SliderRenderer.Draw(spriteBatch, geometry, new SliderRenderStyle(
-            TrackBorderColor,
-            TrackBackgroundColor,
-            FillColor,
-            KnobBorderColor,
-            KnobFaceColor,
-            KnobGripColor,
+            _trackBorderColor,
+            _trackBackgroundColor,
+            _fillColor,
+            _knobBorderColor,
+            _knobFaceColor,
+            _knobGripColor,
             GradientColorAt));
     }
 

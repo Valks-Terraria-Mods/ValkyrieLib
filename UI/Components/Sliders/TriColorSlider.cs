@@ -17,23 +17,23 @@ public abstract class TriColorSlider : UIElement
     public event Action<Color> ColorChanged;
     public Color SelectedColor { get; private set; }
 
-    protected const float SliderHeightPixels = 132f;
-    protected const float LayoutSpacingPixels = 6f;
-    protected const float ControlGapHeightPixels = 4f;
-    protected const float BottomRowHeightPixels = 32f;
-    protected const float BottomRowSpacingPixels = 4f;
-    protected const float ButtonHostWidthPixels = 120f;
-    protected const float ColorSwatchWidthPixels = 58f;
-    protected const float HexPanelWidthPixels = 120f;
-    protected const float SwatchBorderLightenFactor = 0.35f;
+    private const float SliderHeightPixels = 132f;
+    private const float LayoutSpacingPixels = 6f;
+    private const float ControlGapHeightPixels = 4f;
+    private const float BottomRowHeightPixels = 32f;
+    private const float BottomRowSpacingPixels = 4f;
+    private const float ButtonHostWidthPixels = 120f;
+    private const float ColorSwatchWidthPixels = 58f;
+    private const float HexPanelWidthPixels = 120f;
+    private const float SwatchBorderLightenFactor = 0.35f;
 
-    protected UIColoredImageButton _copyButton;
-    protected UIColoredImageButton _pasteButton;
-    protected UIColoredImageButton _randomizeButton;
-    protected UIPanel _colorSwatch;
-    protected UIText _hexText;
+    private UIColoredImageButton _copyButton;
+    private UIColoredImageButton _pasteButton;
+    private UIColoredImageButton _randomizeButton;
+    private UIPanel _colorSwatch;
+    private UIText _hexText;
 
-    protected bool _suppressNotifications;
+    private bool _suppressNotifications;
 
     private readonly List<ColorChannel> _channels = [];
 
