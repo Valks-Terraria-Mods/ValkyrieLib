@@ -165,7 +165,15 @@ public abstract class BoxContainer : UIElement
         float totalSpacing = Math.Max(0, Elements.Count - 1) * _spacing;
         float remaining = MathF.Max(0f, availablePrimary - totalMinSize - totalSpacing);
 
+        // Calculate the alignment offset for children along the primary axis.
+        // For HBox: uses HAlign value (0 = start, 0.5 = center, 1 = end)
+        // For VBox: uses VAlign value (0 = start, 0.5 = center, 1 = end)
+        // This offset is purely visual and does not affect auto-size calculations.
+        float alignmentValue = IsVertical ? VAlign : HAlign;
+        float startOffset = remaining * alignmentValue;
+
         BoxLayoutAccumulationState accumulation = default;
+        accumulation.Cursor = startOffset;
 
         for (int i = 0; i < layouts.Count; i++)
             ApplyChildLayout(layouts[i], availablePrimary, totalExpandWeight, remaining, ref accumulation);
