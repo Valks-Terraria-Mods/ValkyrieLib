@@ -20,8 +20,9 @@
 `HsvSlider`  
 
 ### Interfaces
-`IHasCloseButton`  
 `IBlocksInput`  
+`IHasCloseButton`  
+`IHasScrollbar`  
 
 ## Example Usage
 ```cs
