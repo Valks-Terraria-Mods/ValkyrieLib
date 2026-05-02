@@ -7,6 +7,6 @@ public interface IHasScrollbar
 {
     UIElement MainElement { get; }
     UIElement ScrollViewElement { get; }
-    
+
     void SetScrollbar(UIScrollbar scrollbar);
 }

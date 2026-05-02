@@ -21,6 +21,7 @@
 
 ### Interfaces
 `IBlocksInput`  
+`IHasMainPanel`  
 `IHasCloseButton`  
 `IHasScrollbar`  
 

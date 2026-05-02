@@ -43,6 +43,22 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
 
         _state = stateFactory();
 
+        if (_state is IHasMainPanel hasMainPanel)
+        {
+            const float DefaultWidth = 500;
+            const float DefaultHeight = 300;
+
+            hasMainPanel.MainElement = new UIPanel()
+            {
+                Width = StyleDimension.FromPixels(DefaultWidth),
+                Height = StyleDimension.FromPixels(DefaultHeight),
+                BackgroundColor = ValkyrieAPI.UI.Colors.LightBackground,
+                BorderColor = ValkyrieAPI.UI.Colors.Border,
+                HAlign = 0.5f,
+                VAlign = 0.5f
+            };
+        }
+
         _userInterface.SetState(_state);
 
         if (_state is IHasScrollbar hasScrollbar)
