@@ -12,6 +12,7 @@
 ### Classes
 `HBoxContainer` - Horizontally auto sizes elements for you.  
 `VBoxContainer` - Vertically auto sizes elements for you.  
+`Button`  
 
 ### Components
 `InputField`  
