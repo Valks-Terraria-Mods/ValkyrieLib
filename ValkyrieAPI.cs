@@ -1,8 +1,5 @@
 using Microsoft.Xna.Framework;
-using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
-using Terraria.ModLoader.UI;
-using Terraria.UI;
 
 namespace ValkyrieLib;
 

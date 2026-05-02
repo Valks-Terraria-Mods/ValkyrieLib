@@ -68,7 +68,7 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
             hasScrollbar.MainElement.Append(_uiScrollbar);
             _scrollBarVisible = true;
         }
-        
+
         if (_state is IHasCloseButton hasCloseBtn)
         {
             _closeBtn = CreateCloseButton();

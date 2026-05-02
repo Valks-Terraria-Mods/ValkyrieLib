@@ -682,7 +682,7 @@ public abstract class BoxContainer : UIElement
         internal float UsedPrimary;
         internal float MaxCross;
     }
-    
+
     private struct BoxContainerAutoSizingState
     {
         internal bool AutoPrimary;
