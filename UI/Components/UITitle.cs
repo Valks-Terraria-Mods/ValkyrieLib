@@ -9,7 +9,6 @@ public class UITitle : UIText
 
     public UITitle(string name) : base(name, textScale: 0.5f, large: true)
     {
-        Width = StyleDimension.Fill;
         Height = StyleDimension.FromPixels(Height.Pixels + HeaderPadding);
         HAlign = 0.5f;
     }
