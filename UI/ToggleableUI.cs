@@ -73,8 +73,7 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
         {
             _closeBtn = CreateCloseButton();
             _closeBtn.OnLeftClick += OnClickCloseBtn;
-
-            hasCloseBtn.MainElement.Append(_closeBtn);
+            hasCloseBtn.SetCloseButton(_closeBtn);
         }
     }
 
