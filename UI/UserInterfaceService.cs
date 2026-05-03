@@ -9,19 +9,33 @@ namespace ValkyrieLib;
 internal class UserInterfaceService(KeybindService keybindService)
 {
     private const string VanillaMouseLayerId = "Vanilla: Mouse Text";
-    private readonly List<ToggleableUI> _uis = [];
+    private readonly List<(Mod Mod, string Name, ToggleableUI UI)> _uis = [];
 
     internal void Insert(Mod mod, string name, string keybind, Func<UIState> stateFactory)
     {
         ToggleableUI ui = new(name, stateFactory);
         keybindService.Register(mod, name, keybind, ui.Toggle);
-        _uis.Add(ui);
+        _uis.Add((mod, name, ui));
+    }
+
+    internal void Toggle(Mod mod, string name)
+    {
+        foreach (var registeredUI in _uis)
+        {
+            if (ReferenceEquals(registeredUI.Mod, mod) && string.Equals(registeredUI.Name, name, StringComparison.Ordinal))
+            {
+                registeredUI.UI.Toggle();
+                return;
+            }
+        }
     }
 
     internal void UpdateUI(GameTime gameTime)
     {
-        foreach (ToggleableUI ui in _uis)
+        foreach (var registeredUI in _uis)
         {
+            ToggleableUI ui = registeredUI.UI;
+
             if (ui.IsVisible)
                 ui.Update(gameTime);
         }
@@ -34,8 +48,10 @@ internal class UserInterfaceService(KeybindService keybindService)
         if (vanillaMouseLayer == -1)
             return;
 
-        foreach (ToggleableUI ui in _uis)
+        foreach (var registeredUI in _uis)
         {
+            ToggleableUI ui = registeredUI.UI;
+
             if (ui.IsVisible)
             {
                 ui.Insert(layers, vanillaMouseLayer);

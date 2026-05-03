@@ -34,6 +34,15 @@ public class ModHandle
     }
 
     /// <summary>
+    /// Toggles the visibility of a UI panel registered with the given name.
+    /// </summary>
+    /// <param name="name">The name used when calling <see cref="RegisterUI"/>.</param>
+    public void ToggleUI(string name)
+    {
+        _uiService.Toggle(_mod, name);
+    }
+
+    /// <summary>
     /// Registers a new keybind that invokes an action.
     /// </summary>
     /// <param name="name">The name of this keybind.</param>
