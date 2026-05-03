@@ -24,7 +24,7 @@ public class InputField : UIElement
 
     private readonly string _prefix;
 
-    public InputField(string prefix, string initialValue = "")
+    public InputField(string initialValue = "", string prefix = "")
     {
         _prefix = prefix;
         Width.Set(0f, 1f);
@@ -86,6 +86,13 @@ public class InputField : UIElement
             ValueChanged?.Invoke(_value);
     }
 
+    private float GetPrefixWidth()
+    {
+        if (string.IsNullOrEmpty(_prefix))
+            return 0f;
+        return FontAssets.MouseText.Value.MeasureString(_prefix).X;
+    }
+
     public void ClearFocus()
     {
         _focused = false;
@@ -106,16 +113,15 @@ public class InputField : UIElement
 
     private void DrawValueText(SpriteBatch spriteBatch, CalculatedStyle dimensions)
     {
-        const int ValueLeftPadding = 70;
-
-        Vector2 valuePos = new(dimensions.X + ValueLeftPadding, dimensions.Y + Margin);
+        float prefixWidth = GetPrefixWidth();
+        float gap = string.IsNullOrEmpty(_prefix) ? 0 : 10;  // 10px spacing after prefix
+        float valueX = dimensions.X + Margin + prefixWidth + gap;
+        Vector2 valuePos = new(valueX, dimensions.Y + Margin);
 
         Utils.DrawBorderString(spriteBatch, _value, valuePos, Color.White);
 
-        if (!CaretCanBlink(_focused))
-            return;
-
-        DrawCaret(spriteBatch, valuePos, _value);
+        if (CaretCanBlink(_focused))
+            DrawCaret(spriteBatch, valuePos, _value);
     }
 
     private void DrawPrefixText(SpriteBatch spriteBatch, CalculatedStyle dimensions)
