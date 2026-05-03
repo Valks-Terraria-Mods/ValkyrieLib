@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
+using ReLogic.Graphics;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameInput;
@@ -43,6 +44,29 @@ public class InputField : UIElement
     {
         base.LeftMouseDown(evt);
         _focused = true;
+
+        CalculatedStyle dimensions = GetDimensions();
+        float prefixWidth = GetPrefixWidth();
+        float gap = string.IsNullOrEmpty(_prefix) ? 0 : 10;
+        float textStartX = dimensions.X + Margin + prefixWidth + gap;
+
+        float mouseX = Main.MouseScreen.X;
+        float relativeX = mouseX - textStartX;
+
+        // Find the character index that matches the click position
+        DynamicSpriteFont font = FontAssets.MouseText.Value;
+        int index = 0;
+        float accumulatedWidth = 0f;
+
+        while (index < _value.Length)
+        {
+            float charWidth = font.MeasureString(_value[index].ToString()).X;
+            if (accumulatedWidth + charWidth / 2f > relativeX)
+                break;
+            accumulatedWidth += charWidth;
+            index++;
+        }
+        _cursorIndex = Math.Clamp(index, 0, _value.Length);
     }
 
     public override void MouseOver(UIMouseEvent evt)
