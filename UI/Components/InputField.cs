@@ -34,6 +34,7 @@ public class InputField : UIElement
     private int _selectionStart;
     private int _selectionLength;
     private bool _pasteHandledThisFrame;
+    private bool _isDraggingSelection;
 
     private readonly string _prefix;
 
@@ -57,6 +58,13 @@ public class InputField : UIElement
         _cursorIndex = GetCursorIndexFromMouse();
         _selectionStart = _cursorIndex;
         _selectionLength = 0;
+        _isDraggingSelection = true;
+    }
+
+    public override void LeftMouseUp(UIMouseEvent evt)
+    {
+        base.LeftMouseUp(evt);
+        _isDraggingSelection = false;
     }
 
     public override void MouseOver(UIMouseEvent evt)
@@ -83,6 +91,7 @@ public class InputField : UIElement
     {
         base.DrawSelf(spriteBatch);
 
+        UpdateDragSelection();
         UpdateFocusedTextInput();
 
         CalculatedStyle dimensions = GetDimensions();
@@ -154,6 +163,31 @@ public class InputField : UIElement
             index++;
         }
         return Math.Clamp(index, 0, _value.Length);
+    }
+
+    private void UpdateDragSelection()
+    {
+        // Stop dragging if focus is lost
+        if (!_focused)
+        {
+            _isDraggingSelection = false;
+            return;
+        }
+
+        if (_isDraggingSelection)
+        {
+            if (Main.mouseLeft)
+            {
+                // Still dragging: move the moving end of the selection
+                _cursorIndex = GetCursorIndexFromMouse();
+                _selectionLength = _cursorIndex - _selectionStart;
+            }
+            else
+            {
+                // Mouse button released
+                _isDraggingSelection = false;
+            }
+        }
     }
 
     private void ClearSelection()
@@ -249,7 +283,7 @@ public class InputField : UIElement
 
     private void UpdateFocusedTextInput()
     {
-        if (!_focused)
+        if (!_focused || _isDraggingSelection)
             return;
 
         PlayerInput.WritingText = true;
