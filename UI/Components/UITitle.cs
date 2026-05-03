@@ -5,7 +5,7 @@ namespace ValkyrieLib;
 
 public class UITitle : UIText
 {
-    private const float HeaderPadding = 15f;
+    private const float HeaderPadding = 25f;
 
     public UITitle(string name) : base(name, textScale: 0.5f, large: true)
     {
