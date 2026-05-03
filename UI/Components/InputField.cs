@@ -17,10 +17,16 @@ public class InputField : UIElement
     public int MaxLength { get; set; } = 20;
 
     private static Color _transparentColor = new(100, 100, 100, 100);
+    private static Color _caretColor = new (240, 240, 240);
     private const int Margin = 10;
     private string _value;
     private bool _hovered;
     private bool _focused;
+    private int _cursorIndex;
+    private Keys _heldKey = Keys.None;
+    private int _heldFrames;
+    private const int RepeatDelay = 30;
+    private const int RepeatRate = 3;
 
     private readonly string _prefix;
 
@@ -30,6 +36,7 @@ public class InputField : UIElement
         Width.Set(0f, 1f);
         Height.Set(40, 0f);
         SetValue(initialValue, notify: false);
+        _cursorIndex = _value.Length;
     }
 
     public override void LeftMouseDown(UIMouseEvent evt)
@@ -81,6 +88,7 @@ public class InputField : UIElement
             normalizedValue = normalizedValue[..MaxLength];
 
         _value = normalizedValue;
+        _cursorIndex = Math.Min(_cursorIndex, _value.Length);
 
         if (notify)
             ValueChanged?.Invoke(_value);
@@ -121,7 +129,22 @@ public class InputField : UIElement
         Utils.DrawBorderString(spriteBatch, _value, valuePos, Color.White);
 
         if (CaretCanBlink(_focused))
-            DrawCaret(spriteBatch, valuePos, _value);
+        {
+            string textBeforeCursor = _value[.._cursorIndex];
+            Vector2 textBeforeSize = FontAssets.MouseText.Value.MeasureString(textBeforeCursor);
+
+            float caretX = valuePos.X + textBeforeSize.X - 1f;
+            const float CaretHeight = 20;
+
+            var caretRect = new Rectangle(
+                x: (int)caretX,
+                y: (int)valuePos.Y,
+                width: 2,
+                height: (int)CaretHeight
+            );
+
+            spriteBatch.Draw(TextureAssets.MagicPixel.Value, caretRect, _caretColor);
+        }
     }
 
     private void DrawPrefixText(SpriteBatch spriteBatch, CalculatedStyle dimensions)
@@ -141,12 +164,93 @@ public class InputField : UIElement
         // Handles special multilanguage characters
         Main.instance.HandleIME();
 
-        SetValue(Main.GetInputText(_value));
+        string oldValue = _value;
 
-        KeyboardState keys = Main.keyState;
+        KeyboardState keyState = Main.keyState;
+        KeyboardState oldKeyState = Main.oldKeyState;
 
-        if (keys.IsKeyDown(Keys.Enter) || keys.IsKeyDown(Keys.Escape))
+        // Cursor movement
+        if (KeyPressRepeat(Keys.Left))
+            _cursorIndex = Math.Max(0, _cursorIndex - 1);
+        if (KeyPressRepeat(Keys.Right))
+            _cursorIndex = Math.Min(_value.Length, _cursorIndex + 1);
+        if (KeyPress(Keys.Home))
+            _cursorIndex = 0;
+        if (KeyPress(Keys.End))
+            _cursorIndex = _value.Length;
+
+        if (KeyPressRepeat(Keys.Delete) && _cursorIndex < _value.Length)
+        {
+            string newValue = _value.Remove(_cursorIndex, 1);
+            SetValue(newValue, notify: false);
+        }
+        if (KeyPressRepeat(Keys.Back) && _cursorIndex > 0)
+        {
+            string newValue = _value.Remove(_cursorIndex - 1, 1);
+            _cursorIndex--;
+            SetValue(newValue, notify: false);
+        }
+
+        // Main.GetInputText always appends new characters to the end of the string.
+        // To support typing at any cursor position, we take only the added portion
+        // and insert it at the current cursor index, then advance the caret.
+        string typed = Main.GetInputText(_value);
+        if (typed != _value)
+        {
+            string old = _value;
+            if (typed.Length > old.Length)
+            {
+                string added = typed[old.Length..];
+                string newValue = old.Insert(_cursorIndex, added);
+                if (newValue.Length > MaxLength)
+                    newValue = newValue[..MaxLength];
+                _cursorIndex = Math.Min(_cursorIndex + added.Length, newValue.Length);
+                SetValue(newValue, notify: false);
+            }
+        }
+
+        if (_value != oldValue)
+            ValueChanged?.Invoke(_value);
+
+        if (KeyPress(Keys.Enter) || KeyPress(Keys.Escape))
             _focused = false;
+    }
+
+    private bool KeyPressRepeat(Keys key)
+    {
+        bool down = Main.keyState.IsKeyDown(key);
+        bool wasDown = Main.oldKeyState.IsKeyDown(key);
+
+        // Initial press
+        if (down && !wasDown)
+        {
+            _heldKey = key;
+            _heldFrames = 0;
+            return true;
+        }
+
+        // Held down
+        if (down && wasDown && _heldKey == key)
+        {
+            _heldFrames++;
+            if (_heldFrames >= RepeatDelay && (_heldFrames - RepeatDelay) % RepeatRate == 0)
+                return true;
+            return false;
+        }
+
+        // Key released or different key took over
+        if (!down && wasDown && _heldKey == key)
+        {
+            _heldKey = Keys.None;
+            _heldFrames = 0;
+        }
+
+        return false;
+    }
+
+    private static bool KeyPress(Keys key)
+    {
+        return Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
     }
 
     private static bool CaretCanBlink(bool isFocused)
@@ -160,16 +264,6 @@ public class InputField : UIElement
     private static bool HasClickedOutside(UIElement element, bool isFocused)
     {
         return isFocused && !element.ContainsPoint(Main.MouseScreen) && (Main.mouseLeft || Main.mouseRight);
-    }
-
-    private static void DrawCaret(SpriteBatch spriteBatch, Vector2 valuePos, string valueText)
-    {
-        const int CaretSpacingPixels = 2;
-
-        Vector2 textSize = FontAssets.MouseText.Value.MeasureString(valueText);
-        Vector2 caretPos = new(valuePos.X + textSize.X + CaretSpacingPixels, valuePos.Y);
-
-        Utils.DrawBorderString(spriteBatch, "|", caretPos, Color.White);
     }
 
     private static void DrawSplicedPanel(SpriteBatch spriteBatch, Asset<Texture2D> texture, int x, int y, int width, int height, Color color)
