@@ -34,6 +34,7 @@ public class InputField : UIElement
     private int _selectionStart;
     private int _selectionLength;
     private bool _shiftHeld;
+    private bool _pasteHandledThisFrame;
 
     private readonly string _prefix;
 
@@ -292,7 +293,7 @@ public class InputField : UIElement
 
         // ---- Deletion / Backspace with selection ----
         var (selStart, selEnd) = GetSelectionRange();
-        bool selectionActive = selEnd - selStart > 0;
+        bool selectionActive = selEnd > selStart;
 
         if (KeyPressRepeat(Keys.Delete))
         {
@@ -329,7 +330,7 @@ public class InputField : UIElement
 
         // ---- Typing (replaces selection if active) ----
         string typed = Main.GetInputText(_value);
-        if (typed != _value)
+        if (typed != _value && !_pasteHandledThisFrame)
         {
             if (typed.Length > _value.Length)
             {
@@ -372,11 +373,25 @@ public class InputField : UIElement
             }
         }
 
+        // ---- Paste ----
+        if (KeyPress(Keys.V) && ctrlDown)
+        {
+            PasteClipboard(selectionActive, selStart, selEnd);
+            // Consume the buffered paste so Main.GetInputText doesn't duplicate it
+            Main.GetInputText(_value);
+            _pasteHandledThisFrame = true;
+            clearSelection = true;
+            _selectionStart = _cursorIndex;
+            _selectionLength = 0;
+        }
+
         if (clearSelection)
         {
             _selectionStart = _cursorIndex;
             _selectionLength = 0;
         }
+
+        _pasteHandledThisFrame = false;
 
         // ---- Notify if value changed ----
         if (_value != oldValue)
@@ -467,8 +482,10 @@ public class InputField : UIElement
     {
         var (start, end) = GetSelectionRange();
         string selected = _value[start..end];
-        if (!string.IsNullOrEmpty(selected))
+        if (!string.IsNullOrEmpty(selected)) {
+            Main.NewText("Copied: " + selected);
             Platform.Get<IClipboard>().Value = selected;
+        }
     }
 
     private void PasteClipboard(bool selectionActive, int selStart, int selEnd)
