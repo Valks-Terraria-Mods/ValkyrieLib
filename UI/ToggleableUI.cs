@@ -162,7 +162,7 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
         // Push the button slightly further to the top right corner
         const float Inset = 6.5f;
 
-        var searchCancelBtn = GameAssets.SearchCancelButton;
+        var searchCancelBtn = ValkyrieAPI.UI.Assets.SearchCancelButton;
 
         searchCancelBtn.HAlign = 1f;
         searchCancelBtn.Left = StyleDimension.FromPixels(Inset);

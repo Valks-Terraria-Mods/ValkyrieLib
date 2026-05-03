@@ -189,9 +189,9 @@ public abstract class TriColorSlider : UIElement
         };
         bottomRow.Append(buttonHost);
 
-        _copyButton = SetupActionButton(GameAssets.ColorActions.Copy, 0f, CopyHexToClipboard);
-        _pasteButton = SetupActionButton(GameAssets.ColorActions.Paste, 40f, PasteHexFromClipboard);
-        _randomizeButton = SetupActionButton(GameAssets.ColorActions.Randomize, 80f, RandomizeChannels);
+        _copyButton = SetupActionButton(ValkyrieAPI.UI.Assets.Copy, 0f, CopyHexToClipboard);
+        _pasteButton = SetupActionButton(ValkyrieAPI.UI.Assets.Paste, 40f, PasteHexFromClipboard);
+        _randomizeButton = SetupActionButton(ValkyrieAPI.UI.Assets.Randomize, 80f, RandomizeChannels);
 
         buttonHost.Append(_copyButton);
         buttonHost.Append(_pasteButton);

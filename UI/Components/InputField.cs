@@ -98,10 +98,10 @@ public class InputField : UIElement
         int width = (int)dimensions.Width;
         int height = (int)dimensions.Height;
 
-        DrawSplicedPanel(spriteBatch, GameAssets.CategoryPanel, x, y, width, height, _transparentColor);
+        DrawSplicedPanel(spriteBatch, ValkyrieAPI.UI.Assets.CategoryPanel, x, y, width, height, _transparentColor);
 
         if (_hovered || _focused)
-            DrawSplicedPanel(spriteBatch, GameAssets.CategoryPanelBorder, x, y, width, height, Color.White);
+            DrawSplicedPanel(spriteBatch, ValkyrieAPI.UI.Assets.CategoryPanelBorder, x, y, width, height, Color.White);
     }
 
     private void DrawValueText(SpriteBatch spriteBatch, CalculatedStyle dimensions)
