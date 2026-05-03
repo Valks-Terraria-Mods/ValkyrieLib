@@ -24,7 +24,7 @@ public class InputField : UIElement
     private const int CaretHeight = 20;
 
     private static Color _transparentColor = new(100, 100, 100, 100);
-    private static Color _caretColor = new (240, 240, 240);
+    private static Color _caretColor = new(240, 240, 240);
     private string _value;
     private bool _hovered;
     private bool _focused;
@@ -33,7 +33,6 @@ public class InputField : UIElement
     private int _heldFrames;
     private int _selectionStart;
     private int _selectionLength;
-    private bool _shiftHeld;
     private bool _pasteHandledThisFrame;
 
     private readonly string _prefix;
@@ -54,28 +53,8 @@ public class InputField : UIElement
         base.LeftMouseDown(evt);
         _focused = true;
 
-        CalculatedStyle dimensions = GetDimensions();
-        float prefixWidth = GetPrefixWidth();
-        float gap = string.IsNullOrEmpty(_prefix) ? 0 : 10;
-        float textStartX = dimensions.X + Margin + prefixWidth + gap;
-
-        float mouseX = Main.MouseScreen.X;
-        float relativeX = mouseX - textStartX;
-
-        DynamicSpriteFont font = FontAssets.MouseText.Value;
-        int index = 0;
-        float accumulatedWidth = 0f;
-        while (index < _value.Length)
-        {
-            float charWidth = font.MeasureString(_value[index].ToString()).X;
-            if (accumulatedWidth + charWidth / 2f > relativeX)
-                break;
-            accumulatedWidth += charWidth;
-            index++;
-        }
-        _cursorIndex = Math.Clamp(index, 0, _value.Length);
-
         // Reset selection on click (no shift held)
+        _cursorIndex = GetCursorIndexFromMouse();
         _selectionStart = _cursorIndex;
         _selectionLength = 0;
     }
@@ -129,6 +108,13 @@ public class InputField : UIElement
             ValueChanged?.Invoke(_value);
     }
 
+    public void ClearFocus()
+    {
+        _focused = false;
+    }
+
+    // ---------- Helper methods ----------
+
     private float GetPrefixWidth()
     {
         if (string.IsNullOrEmpty(_prefix))
@@ -136,10 +122,56 @@ public class InputField : UIElement
         return FontAssets.MouseText.Value.MeasureString(_prefix).X;
     }
 
-    public void ClearFocus()
+    private float GetPrefixGap()
     {
-        _focused = false;
+        return string.IsNullOrEmpty(_prefix) ? 0 : 10; // 10px spacing after prefix
     }
+
+    private float GetTextStartX(CalculatedStyle dimensions)
+    {
+        return dimensions.X + Margin + GetPrefixWidth() + GetPrefixGap();
+    }
+
+    private int GetCursorIndexFromMouse()
+    {
+        CalculatedStyle dimensions = GetDimensions();
+        float textStartX = GetTextStartX(dimensions);
+        float relativeX = Main.MouseScreen.X - textStartX;
+        return GetCursorIndexFromRelativeX(relativeX);
+    }
+
+    private int GetCursorIndexFromRelativeX(float relativeX)
+    {
+        DynamicSpriteFont font = FontAssets.MouseText.Value;
+        int index = 0;
+        float accumulatedWidth = 0f;
+        while (index < _value.Length)
+        {
+            float charWidth = font.MeasureString(_value[index].ToString()).X;
+            if (accumulatedWidth + (charWidth / 2f) > relativeX)
+                break;
+            accumulatedWidth += charWidth;
+            index++;
+        }
+        return Math.Clamp(index, 0, _value.Length);
+    }
+
+    private void ClearSelection()
+    {
+        _selectionStart = _cursorIndex;
+        _selectionLength = 0;
+    }
+
+    private (int start, int end) GetSelectionRange()
+    {
+        int selStart = _selectionStart;
+        int selEnd = _selectionStart + _selectionLength;
+        if (selStart > selEnd)
+            (selStart, selEnd) = (selEnd, selStart);
+        return (selStart, selEnd);
+    }
+
+    // ---------- Drawing helpers ----------
 
     private void DrawBackground(SpriteBatch spriteBatch, CalculatedStyle dimensions)
     {
@@ -154,32 +186,23 @@ public class InputField : UIElement
             DrawSplicedPanel(spriteBatch, ValkyrieAPI.UI.Assets.CategoryPanelBorder, x, y, width, height, Color.White);
     }
 
+    private void DrawPrefixText(SpriteBatch spriteBatch, CalculatedStyle dimensions)
+    {
+        Vector2 titlePos = new(dimensions.X + Margin, dimensions.Y + Margin);
+        Utils.DrawBorderString(spriteBatch, _prefix, titlePos, Color.White);
+    }
+
     private void DrawValueText(SpriteBatch spriteBatch, CalculatedStyle dimensions)
     {
-        float prefixWidth = GetPrefixWidth();
-        float gap = string.IsNullOrEmpty(_prefix) ? 0 : 10;  // 10px spacing after prefix
-        float valueX = dimensions.X + Margin + prefixWidth + gap;
-        Vector2 valuePos = new(valueX, dimensions.Y + Margin);
+        DynamicSpriteFont font = FontAssets.MouseText.Value;
+        float textStartX = GetTextStartX(dimensions);
+        Vector2 valuePos = new(textStartX, dimensions.Y + Margin);
 
-        DrawSelectionHighlight(spriteBatch, valuePos, FontAssets.MouseText.Value);
+        DrawSelectionHighlight(spriteBatch, valuePos, font);
         Utils.DrawBorderString(spriteBatch, _value, valuePos, Color.White);
 
         if (CaretCanBlink(_focused))
-        {
-            string textBeforeCursor = _value[.._cursorIndex];
-            Vector2 textBeforeSize = FontAssets.MouseText.Value.MeasureString(textBeforeCursor);
-
-            float caretX = valuePos.X + textBeforeSize.X - 1f;
-
-            var caretRect = new Rectangle(
-                x: (int)caretX,
-                y: (int)valuePos.Y,
-                width: 2,
-                height: CaretHeight
-            );
-            
-            spriteBatch.Draw(TextureAssets.MagicPixel.Value, caretRect, _caretColor);
-        }
+            DrawCaret(spriteBatch, valuePos, font);
     }
 
     private void DrawSelectionHighlight(SpriteBatch spriteBatch, Vector2 valuePos, DynamicSpriteFont font)
@@ -196,20 +219,33 @@ public class InputField : UIElement
         var highlightPos = new Vector2(valuePos.X + beforeWidth, valuePos.Y);
 
         var rect = new Rectangle(
-            (int)highlightPos.X,
-            (int)highlightPos.Y,
-            (int)selectedWidth,
-            CaretHeight
+            x: (int)highlightPos.X,
+            y: (int)highlightPos.Y,
+            width: (int)selectedWidth,
+            height: CaretHeight
         );
 
         spriteBatch.Draw(TextureAssets.MagicPixel.Value, rect, Color.SkyBlue);
     }
 
-    private void DrawPrefixText(SpriteBatch spriteBatch, CalculatedStyle dimensions)
+    private void DrawCaret(SpriteBatch spriteBatch, Vector2 valuePos, DynamicSpriteFont font)
     {
-        Vector2 titlePos = new(dimensions.X + Margin, dimensions.Y + Margin);
-        Utils.DrawBorderString(spriteBatch, _prefix, titlePos, Color.White);
+        string textBeforeCursor = _value[.._cursorIndex];
+        Vector2 textBeforeSize = font.MeasureString(textBeforeCursor);
+
+        float caretX = valuePos.X + textBeforeSize.X - 1f;
+
+        var caretRect = new Rectangle(
+            x: (int)caretX,
+            y: (int)valuePos.Y,
+            width: 2,
+            height: CaretHeight
+        );
+
+        spriteBatch.Draw(TextureAssets.MagicPixel.Value, caretRect, _caretColor);
     }
+
+    // ---------- Input handling ----------
 
     private void UpdateFocusedTextInput()
     {
@@ -221,11 +257,39 @@ public class InputField : UIElement
 
         string oldValue = _value;
 
-        bool clearSelection = false;
         bool shiftDown = Main.keyState.IsKeyDown(Keys.LeftShift) || Main.keyState.IsKeyDown(Keys.RightShift);
         bool ctrlDown = Main.keyState.IsKeyDown(Keys.LeftControl) || Main.keyState.IsKeyDown(Keys.RightControl);
 
-        // ---- Cursor movement with shift selection ----
+        HandleCursorMovement(shiftDown, ctrlDown);
+        HandleDeletion();
+        HandleTypingAndClipboard(ctrlDown);
+
+        bool enterOrEscape = KeyPress(Keys.Enter) || KeyPress(Keys.Escape);
+
+        _pasteHandledThisFrame = false;
+
+        if (_value != oldValue)
+            ValueChanged?.Invoke(_value);
+
+        // ---- Close on Enter/Escape ----
+        if (enterOrEscape)
+        {
+            _focused = false;
+            _selectionStart = 0;
+            _selectionLength = 0;
+        }
+    }
+
+    private void HandleCursorMovement(bool shiftDown, bool ctrlDown)
+    {
+        HandleMoveLeft(shiftDown);
+        HandleMoveRight(shiftDown);
+        HandleWordBoundarySelection(ctrlDown, shiftDown);
+        HandleHomeEnd();
+    }
+
+    private void HandleMoveLeft(bool shiftDown)
+    {
         if (KeyPressRepeat(Keys.Left))
         {
             if (shiftDown)
@@ -237,11 +301,14 @@ public class InputField : UIElement
             }
             else
             {
-                clearSelection = true;
                 _cursorIndex = Math.Max(0, _cursorIndex - 1);
+                ClearSelection();
             }
         }
+    }
 
+    private void HandleMoveRight(bool shiftDown)
+    {
         if (KeyPressRepeat(Keys.Right))
         {
             if (shiftDown)
@@ -253,195 +320,160 @@ public class InputField : UIElement
             }
             else
             {
-                clearSelection = true;
                 _cursorIndex = Math.Min(_value.Length, _cursorIndex + 1);
+                ClearSelection();
             }
         }
+    }
 
-        // Ctrl+Shift+Left/Right: select whole words
-        if (KeyPress(Keys.Left) && ctrlDown && shiftDown)
-        {
-            if (_selectionLength == 0)
-                _selectionStart = _cursorIndex;
-            _cursorIndex = FindPrevWordBoundary(_cursorIndex);
-            _selectionLength = _cursorIndex - _selectionStart;
-        }
-        if (KeyPress(Keys.Right) && ctrlDown && shiftDown)
-        {
-            if (_selectionLength == 0)
-                _selectionStart = _cursorIndex;
-            _cursorIndex = FindNextWordBoundary(_cursorIndex);
-            _selectionLength = _cursorIndex - _selectionStart;
-        }
+    private void HandleWordBoundarySelection(bool ctrlDown, bool shiftDown)
+    {
+        if (!ctrlDown || !shiftDown) return;
 
+        if (KeyPress(Keys.Left))
+            SelectToWordBoundary(FindPrevWordBoundary(_cursorIndex));
+        if (KeyPress(Keys.Right))
+            SelectToWordBoundary(FindNextWordBoundary(_cursorIndex));
+    }
+
+    private void SelectToWordBoundary(int newCursorIndex)
+    {
+        if (_selectionLength == 0)
+            _selectionStart = _cursorIndex;
+        _cursorIndex = newCursorIndex;
+        _selectionLength = _cursorIndex - _selectionStart;
+    }
+
+    private void HandleHomeEnd()
+    {
         if (KeyPress(Keys.Home))
         {
-            clearSelection = true;
             _cursorIndex = 0;
+            ClearSelection();
         }
         if (KeyPress(Keys.End))
         {
-            clearSelection = true;
             _cursorIndex = _value.Length;
+            ClearSelection();
         }
+    }
 
-        if (clearSelection)
+    private void HandleDeletion()
+    {
+        if (KeyPressRepeat(Keys.Delete))
+            HandleDeleteKey();
+        if (KeyPressRepeat(Keys.Back))
+            HandleBackspaceKey();
+    }
+
+    private void HandleDeleteKey()
+    {
+        var (selStart, selEnd) = GetSelectionRange();
+        bool selectionActive = selEnd > selStart;
+        if (selectionActive)
         {
-            _selectionStart = _cursorIndex;
-            _selectionLength = 0;
+            DeleteTextRange(selStart, selEnd - selStart);
+            _cursorIndex = selStart;
         }
+        else if (_cursorIndex < _value.Length)
+        {
+            DeleteTextRange(_cursorIndex, 1);
+        }
+        ClearSelection();
+    }
 
-        // ---- Deletion / Backspace with selection ----
+    private void HandleBackspaceKey()
+    {
+        var (selStart, selEnd) = GetSelectionRange();
+        bool selectionActive = selEnd > selStart;
+        if (selectionActive)
+        {
+            DeleteTextRange(selStart, selEnd - selStart);
+            _cursorIndex = selStart;
+        }
+        else if (_cursorIndex > 0)
+        {
+            _cursorIndex--;
+            DeleteTextRange(_cursorIndex, 1);
+        }
+        ClearSelection();
+    }
+
+    private void DeleteTextRange(int start, int count)
+    {
+        string newValue = _value.Remove(start, count);
+        SetValue(newValue, notify: false);
+    }
+
+    private void HandleTypingAndClipboard(bool ctrlDown)
+    {
         var (selStart, selEnd) = GetSelectionRange();
         bool selectionActive = selEnd > selStart;
 
-        if (KeyPressRepeat(Keys.Delete))
-        {
-            if (selectionActive)
-            {
-                string newValue = _value.Remove(selStart, selEnd - selStart);
-                _cursorIndex = selStart;
-                SetValue(newValue, notify: false);
-                clearSelection = true;
-            }
-            else if (_cursorIndex < _value.Length)
-            {
-                string newValue = _value.Remove(_cursorIndex, 1);
-                SetValue(newValue, notify: false);
-            }
-        }
+        ProcessTyping(selectionActive, selStart, selEnd);
+        ProcessCopy(ctrlDown, selectionActive);
+        ProcessCut(ctrlDown, selectionActive, selStart, selEnd);
+        ProcessPaste(ctrlDown, selectionActive, selStart, selEnd);
+    }
 
-        if (KeyPressRepeat(Keys.Back))
-        {
-            if (selectionActive)
-            {
-                string newValue = _value.Remove(selStart, selEnd - selStart);
-                _cursorIndex = selStart;
-                SetValue(newValue, notify: false);
-                clearSelection = true;
-            }
-            else if (_cursorIndex > 0)
-            {
-                string newValue = _value.Remove(_cursorIndex - 1, 1);
-                _cursorIndex--;
-                SetValue(newValue, notify: false);
-            }
-        }
-
-        // ---- Typing (replaces selection if active) ----
+    // ---- Typing (replaces selection if active) ----
+    private void ProcessTyping(bool selectionActive, int selStart, int selEnd)
+    {
         string typed = Main.GetInputText(_value);
-        if (typed != _value && !_pasteHandledThisFrame)
+        if (typed != _value && !_pasteHandledThisFrame && typed.Length > _value.Length)
         {
-            if (typed.Length > _value.Length)
+            string added = typed[_value.Length..];
+            if (selectionActive)
             {
-                string added = typed[_value.Length..];
-                if (selectionActive)
-                {
-                    string newValue = _value.Remove(selStart, selEnd - selStart).Insert(selStart, added);
-                    if (newValue.Length > MaxLength)
-                        newValue = newValue[..MaxLength];
-                    _cursorIndex = Math.Min(selStart + added.Length, newValue.Length);
-                    SetValue(newValue, notify: false);
-                    clearSelection = true;
-                }
-                else
-                {
-                    string newValue = _value.Insert(_cursorIndex, added);
-                    if (newValue.Length > MaxLength)
-                        newValue = newValue[..MaxLength];
-                    _cursorIndex = Math.Min(_cursorIndex + added.Length, newValue.Length);
-                    SetValue(newValue, notify: false);
-                }
+                string newValue = _value.Remove(selStart, selEnd - selStart).Insert(selStart, added);
+                if (newValue.Length > MaxLength)
+                    newValue = newValue[..MaxLength];
+                _cursorIndex = Math.Min(selStart + added.Length, newValue.Length);
+                SetValue(newValue, notify: false);
+                ClearSelection();
+            }
+            else
+            {
+                string newValue = _value.Insert(_cursorIndex, added);
+                if (newValue.Length > MaxLength)
+                    newValue = newValue[..MaxLength];
+                _cursorIndex = Math.Min(_cursorIndex + added.Length, newValue.Length);
+                SetValue(newValue, notify: false);
             }
         }
+    }
 
-        // ---- Copy / Paste / Cut ----
+    private void ProcessCopy(bool ctrlDown, bool selectionActive)
+    {
         if (KeyPress(Keys.C) && ctrlDown && selectionActive)
             CopySelection();
+    }
 
-        if (KeyPress(Keys.X) && ctrlDown)
+    private void ProcessCut(bool ctrlDown, bool selectionActive, int selStart, int selEnd)
+    {
+        if (KeyPress(Keys.X) && ctrlDown && selectionActive)
         {
-            if (selectionActive)
-            {
-                CopySelection();
-                string newValue = _value.Remove(selStart, selEnd - selStart);
-                _cursorIndex = selStart;
-                SetValue(newValue, notify: false);
-                clearSelection = true;
-                _selectionStart = _cursorIndex;
-                _selectionLength = 0;
-            }
+            CopySelection();
+            string newValue = _value.Remove(selStart, selEnd - selStart);
+            _cursorIndex = selStart;
+            SetValue(newValue, notify: false);
+            ClearSelection();
         }
+    }
 
-        // ---- Paste ----
+    private void ProcessPaste(bool ctrlDown, bool selectionActive, int selStart, int selEnd)
+    {
         if (KeyPress(Keys.V) && ctrlDown)
         {
             PasteClipboard(selectionActive, selStart, selEnd);
             // Consume the buffered paste so Main.GetInputText doesn't duplicate it
             Main.GetInputText(_value);
             _pasteHandledThisFrame = true;
-            clearSelection = true;
-            _selectionStart = _cursorIndex;
-            _selectionLength = 0;
-        }
-
-        if (clearSelection)
-        {
-            _selectionStart = _cursorIndex;
-            _selectionLength = 0;
-        }
-
-        _pasteHandledThisFrame = false;
-
-        // ---- Notify if value changed ----
-        if (_value != oldValue)
-            ValueChanged?.Invoke(_value);
-
-        // ---- Close on Enter/Escape ----
-        if (KeyPress(Keys.Enter) || KeyPress(Keys.Escape))
-        {
-            _focused = false;
-            _selectionStart = 0;
-            _selectionLength = 0;
+            ClearSelection();
         }
     }
 
-    private bool KeyPressRepeat(Keys key)
-    {
-        bool down = Main.keyState.IsKeyDown(key);
-        bool wasDown = Main.oldKeyState.IsKeyDown(key);
-
-        // Initial press
-        if (down && !wasDown)
-        {
-            _heldKey = key;
-            _heldFrames = 0;
-            return true;
-        }
-
-        // Held down
-        if (down && wasDown && _heldKey == key)
-        {
-            _heldFrames++;
-            if (_heldFrames >= RepeatDelay && (_heldFrames - RepeatDelay) % RepeatRate == 0)
-                return true;
-            return false;
-        }
-
-        // Key released or different key took over
-        if (!down && wasDown && _heldKey == key)
-        {
-            _heldKey = Keys.None;
-            _heldFrames = 0;
-        }
-
-        return false;
-    }
-
-    private static bool KeyPress(Keys key)
-    {
-        return Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
-    }
+    // ---------- Word boundary navigation ----------
 
     private int FindNextWordBoundary(int pos)
     {
@@ -478,11 +510,14 @@ public class InputField : UIElement
         return pos;
     }
 
+    // ---------- Clipboard operations ----------
+
     private void CopySelection()
     {
         var (start, end) = GetSelectionRange();
         string selected = _value[start..end];
-        if (!string.IsNullOrEmpty(selected)) {
+        if (!string.IsNullOrEmpty(selected))
+        {
             Main.NewText("Copied: " + selected);
             Platform.Get<IClipboard>().Value = selected;
         }
@@ -490,34 +525,72 @@ public class InputField : UIElement
 
     private void PasteClipboard(bool selectionActive, int selStart, int selEnd)
     {
-        string clipText = Platform.Get<IClipboard>().Value;
-        clipText = clipText.Replace(" ", "").Replace("\r", "").Replace("\n", "");
+        string clipText = GetClipboardText();
         if (clipText.Length == 0) return;
 
         if (selectionActive)
         {
-            string newValue = _value.Remove(selStart, selEnd - selStart).Insert(selStart, clipText);
-            if (newValue.Length > MaxLength) newValue = newValue[..MaxLength];
-            _cursorIndex = Math.Min(selStart + clipText.Length, newValue.Length);
-            SetValue(newValue, notify: false);
+            InsertClipboardText(clipText, selStart, selEnd - selStart);
         }
         else
         {
-            string newValue = _value.Insert(_cursorIndex, clipText);
-            if (newValue.Length > MaxLength) newValue = newValue[..MaxLength];
-            _cursorIndex = Math.Min(_cursorIndex + clipText.Length, newValue.Length);
-            SetValue(newValue, notify: false);
+            InsertClipboardText(clipText, _cursorIndex, 0);
         }
     }
 
-    private (int start, int end) GetSelectionRange()
+    private static string GetClipboardText()
     {
-        int selStart = _selectionStart;
-        int selEnd = _selectionStart + _selectionLength;
-        if (selStart > selEnd)
-            (selStart, selEnd) = (selEnd, selStart);
-        return (selStart, selEnd);
+        string clipText = Platform.Get<IClipboard>().Value;
+        return clipText.Replace(" ", "").Replace("\r", "").Replace("\n", "");
     }
+
+    private void InsertClipboardText(string text, int start, int removeCount)
+    {
+        string newValue = _value.Remove(start, removeCount).Insert(start, text);
+        if (newValue.Length > MaxLength)
+            newValue = newValue[..MaxLength];
+        _cursorIndex = Math.Min(start + text.Length, newValue.Length);
+        SetValue(newValue, notify: false);
+    }
+
+    // ---------- Keyboard state helpers ----------
+
+    private bool KeyPressRepeat(Keys key)
+    {
+        bool down = Main.keyState.IsKeyDown(key);
+        bool wasDown = Main.oldKeyState.IsKeyDown(key);
+
+        // Initial press
+        if (down && !wasDown)
+        {
+            _heldKey = key;
+            _heldFrames = 0;
+            return true;
+        }
+
+        // Held down
+        if (down && wasDown && _heldKey == key)
+        {
+            _heldFrames++;
+            return _heldFrames >= RepeatDelay && (_heldFrames - RepeatDelay) % RepeatRate == 0;
+        }
+
+        // Key released or different key took over
+        if (!down && wasDown && _heldKey == key)
+        {
+            _heldKey = Keys.None;
+            _heldFrames = 0;
+        }
+
+        return false;
+    }
+
+    private static bool KeyPress(Keys key)
+    {
+        return Main.keyState.IsKeyDown(key) && !Main.oldKeyState.IsKeyDown(key);
+    }
+
+    // ---------- Caret & focus utilities ----------
 
     private static bool CaretCanBlink(bool isFocused)
     {
