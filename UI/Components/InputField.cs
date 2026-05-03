@@ -262,7 +262,11 @@ public class InputField : UIElement
 
         HandleCursorMovement(shiftDown, ctrlDown);
         HandleDeletion();
-        HandleTypingAndClipboard(ctrlDown);
+        
+        var (selStart, selEnd) = GetSelectionRange();
+        bool selectionActive = selEnd > selStart;
+
+        ProcessTyping(selectionActive, selStart, selEnd);
 
         bool enterOrEscape = KeyPress(Keys.Enter) || KeyPress(Keys.Escape);
 
@@ -405,17 +409,6 @@ public class InputField : UIElement
         SetValue(newValue, notify: false);
     }
 
-    private void HandleTypingAndClipboard(bool ctrlDown)
-    {
-        var (selStart, selEnd) = GetSelectionRange();
-        bool selectionActive = selEnd > selStart;
-
-        ProcessTyping(selectionActive, selStart, selEnd);
-        ProcessCopy(ctrlDown, selectionActive);
-        ProcessCut(ctrlDown, selectionActive, selStart, selEnd);
-        ProcessPaste(ctrlDown, selectionActive, selStart, selEnd);
-    }
-
     // ---- Typing (replaces selection if active) ----
     private void ProcessTyping(bool selectionActive, int selStart, int selEnd)
     {
@@ -440,36 +433,6 @@ public class InputField : UIElement
                 _cursorIndex = Math.Min(_cursorIndex + added.Length, newValue.Length);
                 SetValue(newValue, notify: false);
             }
-        }
-    }
-
-    private void ProcessCopy(bool ctrlDown, bool selectionActive)
-    {
-        if (KeyPress(Keys.C) && ctrlDown && selectionActive)
-            CopySelection();
-    }
-
-    private void ProcessCut(bool ctrlDown, bool selectionActive, int selStart, int selEnd)
-    {
-        if (KeyPress(Keys.X) && ctrlDown && selectionActive)
-        {
-            CopySelection();
-            string newValue = _value.Remove(selStart, selEnd - selStart);
-            _cursorIndex = selStart;
-            SetValue(newValue, notify: false);
-            ClearSelection();
-        }
-    }
-
-    private void ProcessPaste(bool ctrlDown, bool selectionActive, int selStart, int selEnd)
-    {
-        if (KeyPress(Keys.V) && ctrlDown)
-        {
-            PasteClipboard(selectionActive, selStart, selEnd);
-            // Consume the buffered paste so Main.GetInputText doesn't duplicate it
-            Main.GetInputText(_value);
-            _pasteHandledThisFrame = true;
-            ClearSelection();
         }
     }
 
@@ -508,49 +471,6 @@ public class InputField : UIElement
                 pos--;
         }
         return pos;
-    }
-
-    // ---------- Clipboard operations ----------
-
-    private void CopySelection()
-    {
-        var (start, end) = GetSelectionRange();
-        string selected = _value[start..end];
-        if (!string.IsNullOrEmpty(selected))
-        {
-            Main.NewText("Copied: " + selected);
-            Platform.Get<IClipboard>().Value = selected;
-        }
-    }
-
-    private void PasteClipboard(bool selectionActive, int selStart, int selEnd)
-    {
-        string clipText = GetClipboardText();
-        if (clipText.Length == 0) return;
-
-        if (selectionActive)
-        {
-            InsertClipboardText(clipText, selStart, selEnd - selStart);
-        }
-        else
-        {
-            InsertClipboardText(clipText, _cursorIndex, 0);
-        }
-    }
-
-    private static string GetClipboardText()
-    {
-        string clipText = Platform.Get<IClipboard>().Value;
-        return clipText.Replace(" ", "").Replace("\r", "").Replace("\n", "");
-    }
-
-    private void InsertClipboardText(string text, int start, int removeCount)
-    {
-        string newValue = _value.Remove(start, removeCount).Insert(start, text);
-        if (newValue.Length > MaxLength)
-            newValue = newValue[..MaxLength];
-        _cursorIndex = Math.Min(start + text.Length, newValue.Length);
-        SetValue(newValue, notify: false);
     }
 
     // ---------- Keyboard state helpers ----------
