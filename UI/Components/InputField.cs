@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using ReLogic.Graphics;
-using ReLogic.OS;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.GameInput;
@@ -296,7 +295,7 @@ public class InputField : UIElement
 
         HandleCursorMovement(shiftDown, ctrlDown);
         HandleDeletion();
-        
+
         var (selStart, selEnd) = GetSelectionRange();
         bool selectionActive = selEnd > selStart;
 

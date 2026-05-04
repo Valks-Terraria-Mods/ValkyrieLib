@@ -94,10 +94,7 @@ public sealed class Dropdown<T> : UIElement where T : struct
         };
 
         button.OnLeftClick += (_, _) => TogglePopup();
-        button.OnUpdate += _ =>
-        {
-            button.BackgroundColor = button.IsMouseHovering ? HoverColor : BackgroundColor;
-        };
+        button.OnUpdate += _ => button.BackgroundColor = button.IsMouseHovering ? HoverColor : BackgroundColor;
 
         return button;
     }
@@ -117,7 +114,7 @@ public sealed class Dropdown<T> : UIElement where T : struct
             return;
 
         EnsurePopup(root);
-        float optionContentHeight = _options.Count * OptionHeight + (Math.Max(0, _options.Count - 1) * ListPadding);
+        float optionContentHeight = (_options.Count * OptionHeight) + (Math.Max(0, _options.Count - 1) * ListPadding);
         PositionPopup(optionContentHeight);
         _dropdownPanel!.IgnoresMouseInteraction = false;
         _dropdownPanel.Recalculate();
@@ -222,8 +219,8 @@ public sealed class Dropdown<T> : UIElement where T : struct
     private void PositionPopup(float optionContentHeight)
     {
         var buttonDims = GetDimensions();
-        float popupWidth = ButtonWidth + ScrollbarWidth;
-        float desiredHeight = optionContentHeight + PopupPadding * 2f;
+        const float popupWidth = ButtonWidth + ScrollbarWidth;
+        float desiredHeight = optionContentHeight + (PopupPadding * 2f);
         float boundedHeight = Math.Clamp(desiredHeight, PopupMinHeight, PopupMaxHeight);
 
         float buttonBottom = buttonDims.Y + buttonDims.Height;
