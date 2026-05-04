@@ -1,3 +1,5 @@
 A library that contains some useful things that I will be using across all my mods.
 
+Currently mostly contains some UI helpers but will contain other things in the future.
+
 https://github.com/Valks-Terraria-Mods/ValkyrieLib
