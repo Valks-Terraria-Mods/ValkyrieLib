@@ -23,9 +23,7 @@
 
 ### Interfaces
 `IBlocksInput`  
-`IHasMainPanel`  
 `IHasCloseButton`  
-`IHasScrollbar`  
 
 ## Example Usage
 ```cs

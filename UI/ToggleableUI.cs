@@ -20,8 +20,6 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
     private readonly string _name = $"{nameof(ValkyrieLib)}: {id}";
     private UIState _state;
     private UIImageButton _closeBtn;
-    private UIScrollbar _uiScrollbar;
-    private bool _scrollBarVisible;
 
     /// <summary>
     /// Toggles the visibility of this ui.
@@ -43,31 +41,7 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
 
         _state = stateFactory();
 
-        if (_state is IHasMainPanel hasMainPanel)
-        {
-            const float DefaultWidth = 500;
-            const float DefaultHeight = 300;
-
-            hasMainPanel.MainElement = new UIPanel()
-            {
-                Width = StyleDimension.FromPixels(DefaultWidth),
-                Height = StyleDimension.FromPixels(DefaultHeight),
-                BackgroundColor = ValkyrieAPI.UI.Colors.LightBackground,
-                BorderColor = ValkyrieAPI.UI.Colors.Border,
-                HAlign = 0.5f,
-                VAlign = 0.5f
-            };
-        }
-
         _userInterface.SetState(_state);
-
-        if (_state is IHasScrollbar hasScrollbar)
-        {
-            _uiScrollbar = CreateScrollBar(_state is IHasCloseButton);
-            hasScrollbar.SetScrollbar(_uiScrollbar);
-            hasScrollbar.MainElement.Append(_uiScrollbar);
-            _scrollBarVisible = true;
-        }
 
         if (_state is IHasCloseButton hasCloseBtn)
         {
@@ -87,7 +61,6 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
         if (_state is IHasCloseButton)
             _closeBtn.OnLeftClick -= OnClickCloseBtn;
 
-        _scrollBarVisible = false;
         _userInterface.SetState(null);
     }
 
@@ -98,22 +71,6 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
 
     internal void Update(GameTime gameTime)
     {
-        // Only show the scrollbar if it can actually scroll (there is enough content overflow to allow scrolling)
-        if (_state is IHasScrollbar hasScrollbar)
-        {
-            bool canScroll = _uiScrollbar.CanScroll;
-
-            if (canScroll != _scrollBarVisible)
-            {
-                if (canScroll)
-                    hasScrollbar.MainElement.Append(_uiScrollbar);
-                else
-                    _uiScrollbar.Remove();
-
-                _scrollBarVisible = canScroll;
-            }
-        }
-
         _lastUpdateGameTime = gameTime;
         _userInterface.Update(gameTime);
     }
@@ -137,21 +94,6 @@ internal class ToggleableUI(string id, Func<UIState> stateFactory)
     }
 
     private void OnClickCloseBtn(UIMouseEvent evt, UIElement listeningElement) => Hide();
-
-    private static UIScrollbar CreateScrollBar(bool hasCloseBtn)
-    {
-        float ScrollBarTopInset = hasCloseBtn ? 27f : 2f;
-        const float ScrollBarBottomInset = 3;
-        const float ScrollBarLeftInset = 5;
-
-        return new UIScrollbar()
-        {
-            Height = StyleDimension.FromPixelsAndPercent(-ScrollBarTopInset - ScrollBarBottomInset, 1f),
-            Top = StyleDimension.FromPixels(ScrollBarTopInset),
-            Left = StyleDimension.FromPixels(ScrollBarLeftInset),
-            HAlign = 1f
-        };
-    }
 
     /// <summary>
     /// Creates a close button docked to the top right.
